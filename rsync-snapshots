@@ -26,7 +26,7 @@ do
 		sleep 1000
 	done
 	# download and verify architecture snapshot
-	/data/mirror/openbsd/rsync-snapshot-arch $arch || true
+	/data/mirror/openbsd/bin/rsync-snapshot-arch $arch || true
 	rsyncoptions="$rsyncoptions --exclude $arch"
 done
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
