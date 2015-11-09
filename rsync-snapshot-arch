@@ -12,6 +12,7 @@ arch="$1"
 
 host=217.31.80.35
 bwlimit=3000
+debug=info
 rsyncoptions="--partial --delete-excluded --exclude '.~tmp~'"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-snapshot-arch[$$]"
@@ -26,7 +27,7 @@ if ! [ -d "$dir.new" ]
 then
 	mkdir -- "$dir.new" && ln -- "$dir"/* "$dir.new"
 fi
-$rsync -av "$url" "$dir.new" | logger -p daemon.debug -t rsync
+$rsync -av "$url" "$dir.new" | logger -p daemon.$debug -t rsync
 
 # extract the signify key version from the base.tgz name
 
@@ -47,7 +48,7 @@ if ! ( cd "$dir.new" && signify -C -p "$key" -x SHA256.sig )
 then
 	logger -p daemon.warning -t "$tag" "openbsd $dir fail"
 	exit 1
-fi | logger -p daemon.debug -t signify
+fi | logger -p daemon.$debug -t signify
 
 # replace the old files with the verfied new ones
 

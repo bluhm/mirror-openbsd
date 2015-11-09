@@ -12,6 +12,7 @@ fi
 versions=`jot - 55 58 1`
 archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc octeon sgi socppc sparc sparc64 vax zaurus"
 
+debug=info
 ftp="/data/mirror/openbsd/ftp"
 tag="signify-releases[$$]"
 
@@ -29,7 +30,7 @@ do
 	then
 		echo "$tag: openbsd $dir fail" >&2
 		logger -p daemon.warning -t "$tag" "openbsd $dir fail"
-	fi  | logger -p daemon.info -t signify
+	fi | logger -p daemon.$debug -t signify
 
 	# verify each architecture release
 
@@ -41,7 +42,7 @@ do
 		then
 			echo "$tag: openbsd $dir fail" >&2
 			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
-		fi  | logger -p daemon.info -t signify
+		fi | logger -p daemon.$debug -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $arch success"
 	done
 
@@ -56,7 +57,7 @@ do
 		then
 			echo "$tag: openbsd $dir fail" >&2
 			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
-		fi  | logger -p daemon.info -t signify
+		fi | logger -p daemon.$debug -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $package success"
 	done
 

@@ -13,6 +13,7 @@ archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc
 
 host=217.31.80.35
 bwlimit=2000
+debug=info
 rsyncoptions="--delete --exclude '.~tmp~' --exclude packages"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-snapshots[$$]"
@@ -38,6 +39,6 @@ logger -p daemon.notice -t "$tag" "openbsd archs success"
 logger -p daemon.info -t "$tag" "openbsd remainder start"
 url="rsync://$host/OpenBSD/snapshots/"
 dir="/data/mirror/openbsd/ftp/snapshots"
-$rsync -av "$url" "$dir" | logger -p daemon.debug -t rsync
+$rsync -av "$url" "$dir" | logger -p daemon.$debug -t rsync
 logger -p daemon.notice -t "$tag" "openbsd remainder success"
 exit 0
