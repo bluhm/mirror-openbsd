@@ -10,9 +10,9 @@ then
 fi
 arch="$1"
 
-host=217.31.80.35
-bwlimit=3000
-debug=info
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=3000}"
+debug="${debug:=debug}"
 rsyncoptions="--partial --delete-excluded --exclude '.~tmp~'"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-snapshot-arch[$$]"
