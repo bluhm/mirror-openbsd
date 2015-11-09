@@ -1,0 +1,66 @@
+#!/bin/sh
+# verify all releases, architectures and packages with signify
+
+set -eu
+
+if [ $# != 0 ]
+then
+        echo usage: signify-releases >&2
+        exit 2
+fi
+
+versions=`jot - 55 58 1`
+archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc octeon sgi socppc sparc sparc64 vax zaurus"
+
+ftp="/data/mirror/openbsd/ftp"
+tag="signify-releases[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd start"
+for version in $versions
+do
+	logger -p daemon.info -t "$tag" "openbsd $version start"
+
+	# verify release directory
+
+	release="${version%[0-9]}.${version##[0-9]}"
+	key="/etc/signify/openbsd-$version-base.pub"
+	dir="$ftp/$release"
+	if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
+	then
+		echo "$tag: openbsd $dir fail" >&2
+		logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+	fi  | logger -p daemon.info -t signify
+
+	# verify each architecture release
+
+	for arch in $archs
+	do
+		logger -p daemon.info -t "$tag" "openbsd $arch start"
+		dir="$ftp/$release/$arch"
+		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
+		then
+			echo "$tag: openbsd $dir fail" >&2
+			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+		fi  | logger -p daemon.info -t signify
+		logger -p daemon.notice -t "$tag" "openbsd $arch success"
+	done
+
+	# verify each architecture package
+
+	key="/etc/signify/openbsd-$version-pkg.pub"
+	for dir in $ftp/$release/packages/*
+	do
+		package=${dir##$ftp/$release/}
+		logger -p daemon.info -t "$tag" "openbsd $package start"
+		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
+		then
+			echo "$tag: openbsd $dir fail" >&2
+			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+		fi  | logger -p daemon.info -t signify
+		logger -p daemon.notice -t "$tag" "openbsd $package success"
+	done
+
+	logger -p daemon.notice -t "$tag" "openbsd $version success"
+done
+logger -p daemon.notice -t "$tag" "openbsd success"
+exit 0
