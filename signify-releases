@@ -29,7 +29,7 @@ do
 	if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 	then
 		logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
-	fi | logger -p daemon.$debug -t signify
+	fi | logger -p "daemon.$debug" -t signify
 
 	# verify each architecture release
 
@@ -41,7 +41,7 @@ do
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
-		fi | logger -p daemon.$debug -t signify
+		fi | logger -p "daemon.$debug" -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $arch success"
 	done
 
@@ -56,7 +56,7 @@ do
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
-		fi | logger -p daemon.$debug -t signify
+		fi | logger -p "daemon.$debug" -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $package success"
 	done
 
