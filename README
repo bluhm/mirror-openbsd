@@ -1,0 +1,2 @@
+Scripts to run an OpenBSD mirror.  Sync and verify relevant directories
+from ftp.hostserver.de.
