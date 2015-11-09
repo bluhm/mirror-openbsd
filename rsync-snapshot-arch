@@ -34,7 +34,7 @@ $rsync -av "$url" "$dir.new" | logger -p daemon.$debug -t rsync
 base="`echo "$dir.new"/base??.tgz`"
 if ! [ -f "$base" ]
 then
-	echo no base tgz in "$dir.new" >&2
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir.new no base tgz"
 	exit 1
 fi
 version="${base##*/base}"
@@ -46,7 +46,7 @@ logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
 
 if ! ( cd "$dir.new" && signify -C -p "$key" -x SHA256.sig )
 then
-	logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
 	exit 1
 fi | logger -p daemon.$debug -t signify
 

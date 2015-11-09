@@ -28,8 +28,7 @@ do
 	dir="$ftp/$release"
 	if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 	then
-		echo "$tag: openbsd $dir fail" >&2
-		logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+		logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
 	fi | logger -p daemon.$debug -t signify
 
 	# verify each architecture release
@@ -40,8 +39,8 @@ do
 		dir="$ftp/$release/$arch"
 		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 		then
-			echo "$tag: openbsd $dir fail" >&2
-			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+			logger -p daemon.warning -s -t "$tag" \
+			    "openbsd $dir fail"
 		fi | logger -p daemon.$debug -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $arch success"
 	done
@@ -55,8 +54,8 @@ do
 		logger -p daemon.info -t "$tag" "openbsd $package start"
 		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 		then
-			echo "$tag: openbsd $dir fail" >&2
-			logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+			logger -p daemon.warning -s -t "$tag" \
+			    "openbsd $dir fail"
 		fi | logger -p daemon.$debug -t signify
 		logger -p daemon.notice -t "$tag" "openbsd $package success"
 	done
