@@ -45,9 +45,10 @@ do
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
-			continue
+		else
+			logger -p daemon.notice -t "$tag" \
+			    "openbsd $arch success"
 		fi | logger -p "daemon.$debug" -t signify
-		logger -p daemon.notice -t "$tag" "openbsd $arch success"
 	done
 
 	# verify each architecture package
@@ -62,9 +63,10 @@ do
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
-			continue
+		else
+			logger -p daemon.notice -t "$tag" \
+			    "openbsd $package success"
 		fi | logger -p "daemon.$debug" -t signify
-		logger -p daemon.notice -t "$tag" "openbsd $package success"
 	done
 
 	# verify each patch
@@ -81,9 +83,10 @@ do
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $file fail"
-			continue
+		else
+			logger -p daemon.notice -t "$tag" \
+			    "openbsd $patch success"
 		fi | logger -p "daemon.$debug" -t signify
-		logger -p daemon.notice -t "$tag" "openbsd $patch success"
 	done
 
 	logger -p daemon.notice -t "$tag" "openbsd $version success"
