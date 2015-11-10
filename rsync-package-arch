@@ -1,0 +1,48 @@
+#!/bin/sh
+# call rsync to mirror snapshot package for one arch from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 1 ]
+then
+	echo usage: rsync-package-arch arch >&2
+	exit 2
+fi
+arch="$1"
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=2000}"
+debug="${debug:=debug}"
+rsyncoptions="--partial --delete-excluded --exclude '.~tmp~'"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-package-arch[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd $arch start"
+url="rsync://$host/OpenBSD/snapshots/packages/$arch/"
+dir="/data/mirror/openbsd/ftp/snapshots/packages/$arch"
+$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+
+# extract the signify key version from the base.tgz name
+
+basedir=/data/mirror/openbsd/ftp/snapshots/$arch
+base="`echo "$basedir"/base??.tgz`"
+if ! [ -f "$base" ]
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $basedir no base tgz"
+	exit 1
+fi
+version="${base##*/base}"
+version="${version%.tgz}"
+key="/etc/signify/openbsd-$version-pkg.pub"
+logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
+
+# verify the signature of the new downloaded files
+
+if ! ( cd "$dir" && signify -C -p "$key" -x SHA256.sig )
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
+	exit 1
+fi | logger -p "daemon.$debug" -t signify
+
+logger -p daemon.notice -t "$tag" "openbsd $arch success"
+exit 0
