@@ -10,7 +10,6 @@ then
 fi
 
 versions=`jot - 55 58 1`
-archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc octeon sgi socppc sparc sparc64 vax zaurus"
 
 debug="${debug:=debug}"
 ftp="/data/mirror/openbsd/ftp"
@@ -19,13 +18,14 @@ tag="signify-releases[$$]"
 logger -p daemon.info -t "$tag" "openbsd start"
 for version in $versions
 do
+	release="${version%[0-9]}.${version##[0-9]}"
+	dir="$ftp/$release"
+	[ -d "$dir" ] || continue
 	logger -p daemon.info -t "$tag" "openbsd $version start"
 
 	# verify release directory
 
-	release="${version%[0-9]}.${version##[0-9]}"
 	key="/etc/signify/openbsd-$version-base.pub"
-	dir="$ftp/$release"
 	if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 	then
 		logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
@@ -33,10 +33,14 @@ do
 
 	# verify each architecture release
 
-	for arch in $archs
+	for dir in $ftp/$release/*
 	do
+		[ -d "$dir" ] || continue
+		arch="${dir##*/}"
+		case "$arch" in
+			packages|Changelog) continue ;;
+		esac
 		logger -p daemon.info -t "$tag" "openbsd $arch start"
-		dir="$ftp/$release/$arch"
 		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 		then
 			logger -p daemon.warning -s -t "$tag" \
@@ -50,7 +54,8 @@ do
 	key="/etc/signify/openbsd-$version-pkg.pub"
 	for dir in $ftp/$release/packages/*
 	do
-		package=${dir##$ftp/$release/}
+		[ -d "$dir" ] || continue
+		package="${dir##*/}"
 		logger -p daemon.info -t "$tag" "openbsd $package start"
 		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 		then
