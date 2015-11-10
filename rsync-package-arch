@@ -13,7 +13,7 @@ arch="$1"
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=2000}"
 debug="${debug:=debug}"
-rsyncoptions="--partial --delete-excluded --exclude '.~tmp~'"
+rsyncoptions="--partial --delete-excluded --exclude .~tmp~"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-package-arch[$$]"
 
