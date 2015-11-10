@@ -22,7 +22,7 @@ do
 	[ -d "$dir" ] || continue
 	arch="${dir##*/}"
 	case "$arch" in
-		packages) continue ;;
+		Changelogs|packages|tools) continue ;;
 	esac
 	logger -p daemon.info -t "$tag" "openbsd $arch start"
 

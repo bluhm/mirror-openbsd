@@ -38,7 +38,7 @@ do
 		[ -d "$dir" ] || continue
 		arch="${dir##*/}"
 		case "$arch" in
-			packages|Changelogs) continue ;;
+			Changelogs|packages|tools) continue ;;
 		esac
 		logger -p daemon.info -t "$tag" "openbsd $arch start"
 		if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
