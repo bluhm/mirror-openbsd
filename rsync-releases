@@ -1,44 +1,38 @@
 #!/bin/sh
-# call rsync to mirror all snapshots from ftp.hostserver.de
+# call rsync to mirror new releases from ftp.hostserver.de
 
 set -eu
 
 if [ $# != 0 ]
 then
-	echo usage: rsync-snapshots >&2
+	echo usage: rsync-releases >&2
 	exit 2
 fi
 
-archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc octeon sgi socppc sparc sparc64 vax zaurus"
+# it does not make sense to download old releases again
+excludeversions=`jot - 20 58 1`
 
 host="${host:=217.31.80.35}"
-bwlimit="${bwlimit:=2000}"
+bwlimit="${bwlimit:=1000}"
 debug="${debug:=debug}"
-rsyncoptions="--delete --exclude .~tmp~ --exclude packages"
+rsyncoptions="--delete --exclude .~tmp~ --exclude snapshots"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
-tag="rsync-snapshots[$$]"
+tag="rsync-releases[$$]"
 
-logger -p daemon.info -t "$tag" "openbsd archs start"
-for arch in $archs
+logger -p daemon.info -t "$tag" "openbsd start"
+for version in $excludeversions
 do
-	# make sure that no other job from cron is running
-	while pgrep -q -u rsyncfetch -f rsync-snapshot-arch
-	do
-		sleep 1000
-	done
-	# download and verify architecture snapshot
-	/data/mirror/openbsd/bin/rsync-snapshot-arch $arch || true
-	rsyncoptions="$rsyncoptions --exclude $arch"
+	release="${version%[0-9]}.${version##[0-9]}"
+	rsyncoptions="$rsyncoptions --exclude $release"
 done
+rsyncoptions="$rsyncoptions --exclude unsupported"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
-logger -p daemon.notice -t "$tag" "openbsd archs success"
 
-# get everything else that is not an architecture
-# packages are handled by another job
+# get everything that is not a snapshot or an old release
 
 logger -p daemon.info -t "$tag" "openbsd remainder start"
-url="rsync://$host/OpenBSD/snapshots/"
-dir="/data/mirror/openbsd/ftp/snapshots"
+url="rsync://$host/OpenBSD/"
+dir="/data/mirror/openbsd/ftp"
 $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
-logger -p daemon.notice -t "$tag" "openbsd remainder success"
+logger -p daemon.notice -t "$tag" "openbsd success"
 exit 0
