@@ -30,7 +30,6 @@ rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 
 # get everything that is not a snapshot or an old release
 
-logger -p daemon.info -t "$tag" "openbsd remainder start"
 url="rsync://$host/OpenBSD/"
 dir="/data/mirror/openbsd/ftp"
 $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
