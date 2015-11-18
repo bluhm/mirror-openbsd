@@ -1,0 +1,44 @@
+#!/bin/sh
+# call rsync to mirror all snapshots from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 0 ]
+then
+	echo usage: rsync-snapshots >&2
+	exit 2
+fi
+
+archs="alpha amd64 armish armv7 aviion hppa i386 landisk loongson luna88k macppc octeon sgi socppc sparc sparc64 vax zaurus"
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=2000}"
+debug="${debug:=debug}"
+rsyncoptions="--delete --exclude .~tmp~ --exclude packages"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-snapshots[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd archs start"
+for arch in $archs
+do
+	# make sure that no other job from cron is running
+	while pgrep -q -u rsyncfetch -f rsync-snapshot-arch
+	do
+		sleep 1000
+	done
+	# download and verify architecture snapshot
+	/data/mirror/openbsd/bin/rsync-snapshot-arch $arch || true
+	rsyncoptions="$rsyncoptions --exclude $arch"
+done
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+logger -p daemon.notice -t "$tag" "openbsd archs success"
+
+# get everything else that is not an architecture
+# packages are handled by another job
+
+logger -p daemon.info -t "$tag" "openbsd remainder start"
+url="rsync://$host/OpenBSD/snapshots/"
+dir="/data/mirror/openbsd/ftp/snapshots"
+$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+logger -p daemon.notice -t "$tag" "openbsd remainder success"
+exit 0
