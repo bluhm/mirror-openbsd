@@ -1,2 +1,11 @@
 Scripts to run an OpenBSD mirror.  Sync and verify relevant directories
-from ftp.hostserver.de.
+from ftp.hostserver.de.  The whole tree is splitted into parts so
+that important directories can be synced more often by cron.
+
+rsync-snapshot-arch	fetch and verify base snapshot for one architecture
+rsync-snapshots		fetch and verify all snapshots, but no packages
+rsync-package-arch	fetch and verify snapshot packages for one architecture
+rsync-packages		fetch and verify all packages
+signify-releases	verify all releases, base and packages
+signify-snapshots	verify snapshots, base and packages
+
