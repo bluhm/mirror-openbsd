@@ -47,13 +47,12 @@ logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
 if ! ( cd "$dir.new" && signify -C -p "$key" -x SHA256.sig )
 then
 	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
-	exit 1
+else
+	# replace the old files with the verfied new ones
+	mv -- "$dir" "$dir.old"
+	mv -- "$dir.new" "$dir"
+	rm -rf -- "$dir.old"
+	logger -p daemon.notice -t "$tag" "openbsd $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
-# replace the old files with the verfied new ones
-
-mv -- "$dir" "$dir.old"
-mv -- "$dir.new" "$dir"
-rm -rf -- "$dir.old"
-logger -p daemon.notice -t "$tag" "openbsd $arch success"
 exit 0

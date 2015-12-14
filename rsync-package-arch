@@ -41,8 +41,8 @@ logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
 if ! ( cd "$dir" && signify -C -p "$key" -x SHA256.sig )
 then
 	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
-	exit 1
+else
+	logger -p daemon.notice -t "$tag" "openbsd $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
-logger -p daemon.notice -t "$tag" "openbsd $arch success"
 exit 0

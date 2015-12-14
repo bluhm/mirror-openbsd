@@ -16,6 +16,7 @@ ftp="/data/mirror/openbsd/ftp"
 tag="signify-releases[$$]"
 
 logger -p daemon.info -t "$tag" "openbsd start"
+
 for version in $versions
 do
 	release="${version%[0-9]}.${version##[0-9]}"
@@ -91,5 +92,6 @@ do
 
 	logger -p daemon.notice -t "$tag" "openbsd $version success"
 done
+
 logger -p daemon.notice -t "$tag" "openbsd success"
 exit 0
