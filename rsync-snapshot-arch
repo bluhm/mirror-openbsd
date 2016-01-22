@@ -25,7 +25,11 @@ url="rsync://$host/OpenBSD/snapshots/$arch/"
 dir="/data/mirror/openbsd/ftp/snapshots/$arch"
 if ! [ -d "$dir.new" ]
 then
-	mkdir -- "$dir.new" && ln -- "$dir"/* "$dir.new"
+	mkdir -- "$dir.new"
+	if [ -d "$dir" ]
+	then
+		ln -- "$dir"/* "$dir.new"
+	fi
 fi
 $rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
 
@@ -49,7 +53,10 @@ then
 	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
 else
 	# replace the old files with the verfied new ones
-	mv -- "$dir" "$dir.old"
+	if [ -d "$dir" ]
+	then
+		mv -- "$dir" "$dir.old"
+	fi
 	mv -- "$dir.new" "$dir"
 	rm -rf -- "$dir.old"
 	logger -p daemon.notice -t "$tag" "openbsd $arch success"
