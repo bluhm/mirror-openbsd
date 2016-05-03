@@ -1,0 +1,24 @@
+#!/bin/sh
+# call rsync to mirror all songs from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 0 ]
+then
+	echo usage: rsync-songs >&2
+	exit 2
+fi
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=1000}"
+debug="${debug:=debug}"
+rsyncoptions="--delete --exclude .~tmp~ --exclude packages"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-songs[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd songs start"
+url="rsync://$host/OpenBSD/songs/"
+dir="/data/mirror/openbsd/ftp/songs"
+$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+logger -p daemon.notice -t "$tag" "openbsd songs success"
+exit 0
