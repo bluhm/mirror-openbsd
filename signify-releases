@@ -9,7 +9,7 @@ then
         exit 2
 fi
 
-versions=`jot - 55 99 1`
+versions=`jot - 99 55 -1`
 
 debug="${debug:=debug}"
 ftp="/data/mirror/openbsd/ftp"
