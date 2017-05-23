@@ -29,7 +29,7 @@ url="rsync://$host/OpenBSD/$release/$arch/"
 dir="/data/mirror/openbsd/ftp/$release/$arch"
 if ! [ -d "$dir.new" ]
 then
-	mkdir -- "$dir.new"
+	mkdir -p -- "$dir.new"
 	if [ -d "$dir" ]
 	then
 		ln -- "$dir"/* "$dir.new"
