@@ -1,28 +1,32 @@
 #!/bin/sh
-# call rsync to mirror snapshot for one arch from ftp.hostserver.de
+# call rsync to mirror one release for one arch from ftp.hostserver.de
 
 set -eu
 
 if [ $# != 1 ]
 then
-	echo usage: rsync-snapshot-arch arch >&2
+	echo usage: rsync-release-arch version arch >&2
 	exit 2
 fi
-arch="$1"
+version="$1"
+arch="$2"
 
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=3000}"
 debug="${debug:=debug}"
 rsyncoptions="--partial --delete-excluded --exclude .~tmp~"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
-tag="rsync-snapshot-arch[$$]"
+tag="rsync-release-arch[$$]"
+
+version="$(echo "$version" | tr -cd 0-9)"
+release="${version%[0-9]}.${version#[0-9]}"
 
 # create a new directory with the old files hardlinked
 # if the new directory is already there, use this partial download
 
 logger -p daemon.info -t "$tag" "openbsd $arch start"
-url="rsync://$host/OpenBSD/snapshots/$arch/"
-dir="/data/mirror/openbsd/ftp/snapshots/$arch"
+url="rsync://$host/OpenBSD/$release/$arch/"
+dir="/data/mirror/openbsd/ftp/$release/$arch"
 if ! [ -d "$dir.new" ]
 then
 	mkdir -- "$dir.new"
@@ -41,8 +45,6 @@ then
 	logger -p daemon.warning -s -t "$tag" "openbsd $dir.new no base tgz"
 	exit 1
 fi
-version="${base##*/base}"
-version="${version%.tgz}"
 key="/etc/signify/openbsd-$version-base.pub"
 logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
 
