@@ -1,0 +1,65 @@
+#!/bin/sh
+# call rsync to mirror snapshot for one arch from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 1 ]
+then
+	echo usage: rsync-snapshot-arch arch >&2
+	exit 2
+fi
+arch="$1"
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=3000}"
+debug="${debug:=debug}"
+rsyncoptions="--partial --delete-excluded --exclude .~tmp~"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-snapshot-arch[$$]"
+
+# create a new directory with the old files hardlinked
+# if the new directory is already there, use this partial download
+
+logger -p daemon.info -t "$tag" "openbsd $arch start"
+url="rsync://$host/OpenBSD/snapshots/$arch/"
+dir="/data/mirror/openbsd/ftp/snapshots/$arch"
+if ! [ -d "$dir.new" ]
+then
+	mkdir -- "$dir.new"
+	if [ -d "$dir" ]
+	then
+		ln -- "$dir"/* "$dir.new"
+	fi
+fi
+$rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
+
+# extract the signify key version from the base.tgz name
+
+base="`echo "$dir.new"/base??.tgz`"
+if ! [ -f "$base" ]
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir.new no base tgz"
+	exit 1
+fi
+version="${base##*/base}"
+version="${version%.tgz}"
+key="/etc/signify/openbsd-$version-base.pub"
+logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
+
+# verify the signature of the new downloaded files
+
+if ! ( cd "$dir.new" && signify -C -p "$key" -x SHA256.sig )
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
+else
+	# replace the old files with the verfied new ones
+	if [ -d "$dir" ]
+	then
+		mv -- "$dir" "$dir.old"
+	fi
+	mv -- "$dir.new" "$dir"
+	rm -rf -- "$dir.old"
+	logger -p daemon.notice -t "$tag" "openbsd $arch success"
+fi | logger -p "daemon.$debug" -t signify
+
+exit 0
