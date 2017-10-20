@@ -1,9 +1,11 @@
 #!/bin/sh
 # call rsync to mirror all firmwares from firmware.openbsd.org
 
+# XXX broken, there is no firmware via rsync
+
 set -eu
 
-if [ $# != 2 ]
+if [ $# != 0 ]
 then
 	echo usage: rsync-firmware >&2
 	exit 2
