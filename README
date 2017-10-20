@@ -6,6 +6,7 @@ rsync-snapshot-arch	fetch and verify base snapshot for one architecture
 rsync-snapshots		fetch and verify all snapshots, but no packages
 rsync-package-arch	fetch and verify snapshot packages for one architecture
 rsync-packages		fetch and verify all packages
+rsync-release-arch	fetch one release for one architecture
 rsync-releases		fetch new releases and other files, but no snapshots
 signify-releases	verify all releases: base, packages and patches
 signify-snapshots	verify snapshots: base and packages
