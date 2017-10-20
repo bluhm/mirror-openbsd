@@ -1,0 +1,71 @@
+#!/bin/sh
+# call rsync to mirror all firmwares from firmware.openbsd.org
+
+set -eu
+
+if [ $# != 2 ]
+then
+	echo usage: rsync-firmware >&2
+	exit 2
+fi
+
+host="${host:=firmware.openbsd.org}"
+bwlimit="${bwlimit:=3000}"
+debug="${debug:=debug}"
+rsyncoptions="--partial --delete-excluded --exclude .~tmp~"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-firmware[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd firmware start"
+
+# get everything that is not a snapshot or an old release
+
+url="rsync://$host/firmware"
+dir="/data/mirror/openbsd/ftp"
+nosnap="--exclude snapshots"
+$rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+logger -p daemon.notice -t "$tag" "openbsd firmware release success"
+
+# create a new directory with the old files hardlinked
+# if the new directory is already there, use this partial download
+
+url="rsync://$host/firmware/snapshots/"
+dir="/data/mirror/openbsd/ftp/firmware/snapshots"
+if ! [ -d "$dir.new" ]
+then
+	mkdir -p -- "$dir.new"
+	if [ -d "$dir" ]
+	then
+		ln -- "$dir"/* "$dir.new"
+	fi
+fi
+$rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
+
+# extract the signify key version from SHA256.sig
+
+sig="$dir.new/SHA256.sig"
+if ! [ -f "$sig" ]
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir.new no SHA256.sig"
+	exit 1
+fi
+key="/etc/signify/`sed -n 's/^untrusted comment: verify with //p' $sig`"
+logger -p daemon.info -t "$tag" "openbsd firmware signify key $key"
+
+# verify the signature of the new downloaded files
+
+if ! ( cd "$dir.new" && signify -C -p "$key" -x SHA256.sig )
+then
+	logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
+else
+	# replace the old files with the verfied new ones
+	if [ -d "$dir" ]
+	then
+		mv -- "$dir" "$dir.old"
+	fi
+	mv -- "$dir.new" "$dir"
+	rm -rf -- "$dir.old"
+	logger -p daemon.notice -t "$tag" "openbsd firmware success"
+fi | logger -p "daemon.$debug" -t signify
+
+exit 0
