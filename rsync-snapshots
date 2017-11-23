@@ -14,7 +14,7 @@ archs="alpha amd64 armish armv7 hppa i386 landisk loongson luna88k macppc octeon
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=2000}"
 debug="${debug:=debug}"
-rsyncoptions="--delete --exclude .~tmp~ --exclude packages"
+rsyncoptions="--delete --exclude .~tmp~ --exclude '.*' --exclude packages"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-snapshots[$$]"
 

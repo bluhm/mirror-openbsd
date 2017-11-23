@@ -12,7 +12,7 @@ fi
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=1000}"
 debug="${debug:=debug}"
-rsyncoptions="--delete --exclude .~tmp~ --exclude packages"
+rsyncoptions="--delete --exclude .~tmp~ --exclude '.*'"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-songs[$$]"
 
