@@ -25,7 +25,7 @@ logger -p daemon.info -t "$tag" "openbsd firmware start"
 url="rsync://$host/firmware"
 dir="/data/mirror/openbsd/ftp"
 nosnap="--exclude snapshots"
-$rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+eval $rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 logger -p daemon.notice -t "$tag" "openbsd firmware release success"
 
 # create a new directory with the old files hardlinked
@@ -41,7 +41,7 @@ then
 		ln -- "$dir"/* "$dir.new"
 	fi
 fi
-$rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
+eval $rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
 
 # extract the signify key version from SHA256.sig
 

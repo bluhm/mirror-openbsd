@@ -19,6 +19,6 @@ tag="rsync-songs[$$]"
 logger -p daemon.info -t "$tag" "openbsd songs start"
 url="rsync://$host/OpenBSD/songs/"
 dir="/data/mirror/openbsd/ftp/songs"
-$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 logger -p daemon.notice -t "$tag" "openbsd songs success"
 exit 0

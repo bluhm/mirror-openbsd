@@ -32,6 +32,6 @@ rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 
 url="rsync://$host/OpenBSD/"
 dir="/data/mirror/openbsd/ftp"
-$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 logger -p daemon.notice -t "$tag" "openbsd success"
 exit 0

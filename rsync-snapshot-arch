@@ -31,7 +31,7 @@ then
 		ln -- "$dir"/* "$dir.new"
 	fi
 fi
-$rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
+eval $rsync -av "$url" "$dir.new" | logger -p "daemon.$debug" -t rsync
 
 # extract the signify key version from the base.tgz name
 

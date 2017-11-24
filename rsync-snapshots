@@ -39,6 +39,6 @@ logger -p daemon.notice -t "$tag" "openbsd archs success"
 logger -p daemon.info -t "$tag" "openbsd remainder start"
 url="rsync://$host/OpenBSD/snapshots/"
 dir="/data/mirror/openbsd/ftp/snapshots"
-$rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 logger -p daemon.notice -t "$tag" "openbsd remainder success"
 exit 0
