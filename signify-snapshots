@@ -48,12 +48,26 @@ done
 
 # verify each architecture package
 
-key="/etc/signify/openbsd-$version-pkg.pub"
 for dir in $ftp/snapshots/packages/*
 do
 	[ -d "$dir" ] || continue
 	arch=${dir##*/}
 	logger -p daemon.info -t "$tag" "openbsd package $arch start"
+
+	if ! [ -f SHA256.sig ]
+	then
+		logger -p daemon.warning -s -t "$tag" \
+		    "openbsd $dir no SHA256 sig"
+		continue
+	fi
+	key=`sed -n '1s,^untrusted comment: verify with \(openbsd-..-pkg.pub\)$,/etc/signify/\1,p' SHA256.sig`
+	if [ -z "$key" ]
+	then
+		logger -p daemon.warning -s -t "$tag" \
+		    "openbsd $dir no key name in comment"
+		continue
+	fi
+
 	if ! ( cd $dir && signify -C -p $key -x SHA256.sig )
 	then
 		logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
