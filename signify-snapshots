@@ -5,8 +5,8 @@ set -eu
 
 if [ $# != 0 ]
 then
-        echo usage: signify-snapshots >&2
-        exit 2
+	echo usage: signify-snapshots >&2
+	exit 2
 fi
 
 debug="${debug:=debug}"

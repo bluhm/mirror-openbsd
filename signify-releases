@@ -5,8 +5,8 @@ set -eu
 
 if [ $# != 0 ]
 then
-        echo usage: signify-releases >&2
-        exit 2
+	echo usage: signify-releases >&2
+	exit 2
 fi
 
 versions=`jot - 99 55 -1`
