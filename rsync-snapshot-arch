@@ -25,7 +25,7 @@ url="rsync://$host/OpenBSD/snapshots/$arch/"
 dir="/data/mirror/openbsd/ftp/snapshots/$arch"
 if ! [ -d "$dir.new" ]
 then
-	mkdir -- "$dir.new"
+	mkdir -p -- "$dir.new"
 	if [ -d "$dir" ]
 	then
 		ln -- "$dir"/* "$dir.new"
