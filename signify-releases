@@ -93,5 +93,5 @@ do
 	logger -p daemon.notice -t "$tag" "openbsd $version success"
 done
 
-logger -p daemon.notice -t "$tag" "openbsd success"
+logger -p daemon.notice -t "$tag" "openbsd finished"
 exit 0

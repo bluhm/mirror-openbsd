@@ -77,5 +77,5 @@ do
 	fi | logger -p "daemon.$debug" -t signify
 done
 
-logger -p daemon.notice -t "$tag" "openbsd success"
+logger -p daemon.notice -t "$tag" "openbsd finished"
 exit 0
