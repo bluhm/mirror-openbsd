@@ -22,7 +22,7 @@ logger -p daemon.info -t "$tag" "openbsd start"
 
 # get everything that is not a snapshot or an old release
 
-url="rsync://$host/firmware"
+url="rsync://$host/firmware/firmware"
 dir="/data/mirror/openbsd/ftp"
 nosnap="--exclude snapshots"
 eval $rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
@@ -31,7 +31,7 @@ logger -p daemon.notice -t "$tag" "openbsd release success"
 # create a new directory with the old files hardlinked
 # if the new directory is already there, use this partial download
 
-url="rsync://$host/firmware/snapshots/"
+url="rsync://$host/firmware/firmware/snapshots/"
 dir="/data/mirror/openbsd/ftp/firmware/snapshots"
 if ! [ -d "$dir.new" ]
 then
