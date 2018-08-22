@@ -1,96 +1,61 @@
 #!/bin/sh
-# verify all releases, architectures and packages with signify
+# verify all firmware with signify
 
 set -eu
 
 if [ $# != 0 ]
 then
-	echo usage: signify-releases >&2
+	echo usage: signify-firmware >&2
 	exit 2
 fi
 
-versions=`jot - 99 55 -1`
+versions=`jot - 99 57 -1`
 
 debug="${debug:=debug}"
-ftp="/data/mirror/openbsd/ftp"
+fw="/data/mirror/openbsd/ftp/firmware"
 tag="signify-releases[$$]"
 
 logger -p daemon.info -t "$tag" "openbsd start"
 
-for version in $versions
+for version in $versions snapshots
 do
-	release="${version%[0-9]}.${version##[0-9]}"
-	dir="$ftp/$release"
+	if [ "$version" = snapshots ]
+	then
+		release="$version"
+	else
+		release="${version%[0-9]}.${version##[0-9]}"
+	fi
+
+	dir="$fw/$release"
 	[ -d "$dir" ] || continue
 	logger -p daemon.info -t "$tag" "openbsd $version start"
 
 	# verify release directory
 
-	key="/etc/signify/openbsd-$version-base.pub"
+	if [ "$version" = snapshots ]
+	then
+		sig="$dir/SHA256.sig"
+		if ! [ -f "$sig" ]
+		then
+			logger -p daemon.warning -s -t "$tag" \
+			    "openbsd $dir no SHA256.sig"
+			exit 1
+		fi
+		key="/etc/signify/`sed -n 's/^untrusted comment: verify with //p' $sig`"
+		logger -p daemon.info -t "$tag" \
+		    "openbsd snapshot signify key $key"
+	else
+		key="/etc/signify/openbsd-$version-fw.pub"
+	fi
+
 	if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
 	then
-		logger -p daemon.warning -s -t "$tag" "openbsd $dir fail"
+		logger -p daemon.warning -s -t "$tag" \
+		    "openbsd $dir fail"
+	else
+		logger -p daemon.notice -t "$tag" \
+		    "openbsd $version success"
 	fi | logger -p "daemon.$debug" -t signify
-
-	# verify each architecture release
-
-	for dir in $ftp/$release/*
-	do
-		[ -d "$dir" ] || continue
-		arch="${dir##*/}"
-		case "$arch" in
-			Changelogs|packages|tools) continue ;;
-		esac
-		logger -p daemon.info -t "$tag" "openbsd $arch start"
-		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
-		then
-			logger -p daemon.warning -s -t "$tag" \
-			    "openbsd $dir fail"
-		else
-			logger -p daemon.notice -t "$tag" \
-			    "openbsd $arch success"
-		fi | logger -p "daemon.$debug" -t signify
-	done
-
-	# verify each architecture package
-
-	key="/etc/signify/openbsd-$version-pkg.pub"
-	for dir in $ftp/$release/packages/*
-	do
-		[ -d "$dir" ] || continue
-		package="${dir##*/}"
-		logger -p daemon.info -t "$tag" "openbsd $package start"
-		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
-		then
-			logger -p daemon.warning -s -t "$tag" \
-			    "openbsd $dir fail"
-		else
-			logger -p daemon.notice -t "$tag" \
-			    "openbsd $package success"
-		fi | logger -p "daemon.$debug" -t signify
-	done
-
-	# verify each patch
-
-	dir="$ftp/patches/$release/common"
-	[ -d "$dir" ] || continue
-	key="/etc/signify/openbsd-$version-base.pub"
-	for file in "$dir"/*.sig
-	do
-		[ -f "$file" ] || continue
-		patch="${file##*/}"
-		logger -p daemon.info -t "$tag" "openbsd $patch start"
-		if ! ( cd "$dir" && signify -V -e -p $key -x $patch -m /dev/null )
-		then
-			logger -p daemon.warning -s -t "$tag" \
-			    "openbsd $file fail"
-		else
-			logger -p daemon.notice -t "$tag" \
-			    "openbsd $patch success"
-		fi | logger -p "daemon.$debug" -t signify
-	done
-
-	logger -p daemon.notice -t "$tag" "openbsd $version success"
 done
 
 logger -p daemon.notice -t "$tag" "openbsd success"
