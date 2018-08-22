@@ -18,7 +18,7 @@ rsyncoptions="--partial --delete-excluded --exclude .~tmp~ --exclude '.*'"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-firmware[$$]"
 
-logger -p daemon.info -t "$tag" "openbsd firmware start"
+logger -p daemon.info -t "$tag" "openbsd start"
 
 # get everything that is not a snapshot or an old release
 
@@ -26,7 +26,7 @@ url="rsync://$host/firmware"
 dir="/data/mirror/openbsd/ftp"
 nosnap="--exclude snapshots"
 eval $rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
-logger -p daemon.notice -t "$tag" "openbsd firmware release success"
+logger -p daemon.notice -t "$tag" "openbsd release success"
 
 # create a new directory with the old files hardlinked
 # if the new directory is already there, use this partial download
@@ -52,7 +52,7 @@ then
 	exit 1
 fi
 key="/etc/signify/`sed -n 's/^untrusted comment: verify with //p' $sig`"
-logger -p daemon.info -t "$tag" "openbsd firmware signify key $key"
+logger -p daemon.info -t "$tag" "openbsd signify key $key"
 
 # verify the signature of the new downloaded files
 
@@ -67,7 +67,7 @@ else
 	fi
 	mv -- "$dir.new" "$dir"
 	rm -rf -- "$dir.old"
-	logger -p daemon.notice -t "$tag" "openbsd firmware success"
+	logger -p daemon.notice -t "$tag" "openbsd snapshot success"
 fi | logger -p "daemon.$debug" -t signify
 
 exit 0
