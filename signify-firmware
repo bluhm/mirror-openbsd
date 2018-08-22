@@ -13,7 +13,7 @@ versions=`jot - 99 57 -1`
 
 debug="${debug:=debug}"
 fw="/data/mirror/openbsd/ftp/firmware"
-tag="signify-releases[$$]"
+tag="signify-firmware[$$]"
 
 logger -p daemon.info -t "$tag" "openbsd start"
 
