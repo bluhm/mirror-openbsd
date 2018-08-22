@@ -20,7 +20,7 @@ tag="rsync-firmware[$$]"
 
 logger -p daemon.info -t "$tag" "openbsd start"
 
-# get everything that is not a snapshot or an old release
+# get everything that is not a snapshot, presumably a release
 
 url="rsync://$host/firmware/firmware"
 dir="/data/mirror/openbsd/ftp"
