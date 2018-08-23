@@ -23,7 +23,7 @@ logger -p daemon.info -t "$tag" "openbsd start"
 # get everything that is not a snapshot, presumably a release
 
 url="rsync://$host/firmware/firmware"
-dir="/data/mirror/openbsd/ftp"
+dir="/data/mirror/openbsd/firmware"
 nosnap="--exclude snapshots"
 eval $rsync $nosnap -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 logger -p daemon.notice -t "$tag" "openbsd release success"
@@ -32,7 +32,7 @@ logger -p daemon.notice -t "$tag" "openbsd release success"
 # if the new directory is already there, use this partial download
 
 url="rsync://$host/firmware/firmware/snapshots/"
-dir="/data/mirror/openbsd/ftp/firmware/snapshots"
+dir="/data/mirror/openbsd/firmware/firmware/snapshots"
 if ! [ -d "$dir.new" ]
 then
 	mkdir -p -- "$dir.new"
