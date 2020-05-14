@@ -15,7 +15,7 @@ excludeversions=`jot - 20 64 1`
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=1000}"
 debug="${debug:=debug}"
-rsyncoptions="--delete --exclude .~tmp~ --exclude '.*' --exclude snapshots"
+rsyncoptions="--exclude .~tmp~ --exclude '.*' --exclude snapshots"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-releases[$$]"
 
