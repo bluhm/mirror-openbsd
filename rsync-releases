@@ -10,7 +10,7 @@ then
 fi
 
 # it does not make sense to download old releases again
-excludeversions=`jot - 20 65 1`
+excludeversions=`jot - 20 66 1`
 
 host="${host:=217.31.80.35}"
 bwlimit="${bwlimit:=1000}"
