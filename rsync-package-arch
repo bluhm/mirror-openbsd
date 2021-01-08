@@ -24,7 +24,13 @@ eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
 
 # extract the signify key version from the base.tgz name
 
-basedir=/data/mirror/openbsd/ftp/snapshots/$arch
+machine="$arch"
+[ "$arch" = aarch64 ] && machine=arm64
+[ "$arch" = arm ] && machine=armv7
+[ "$arch" = mips64 ] && machine=octeon
+[ "$arch" = mips64el ] && machine=loongson
+[ "$arch" = powerpc ] && machine=macppc
+basedir="/data/mirror/openbsd/ftp/snapshots/$machine"
 base="`echo "$basedir"/base??.tgz`"
 if ! [ -f "$base" ]
 then
@@ -34,7 +40,7 @@ fi
 version="${base##*/base}"
 version="${version%.tgz}"
 key="/etc/signify/openbsd-$version-pkg.pub"
-logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
+logger -p daemon.info -t "$tag" "openbsd $machine signify key $key"
 
 # verify the signature of the new downloaded files
 
