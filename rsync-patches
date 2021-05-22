@@ -1,0 +1,24 @@
+#!/bin/sh
+# call rsync to mirror all patches from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 0 ]
+then
+	echo usage: rsync-patches >&2
+	exit 2
+fi
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=1000}"
+debug="${debug:=debug}"
+rsyncoptions="--delete --exclude .~tmp~ --exclude '.*'"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-patches[$$]"
+
+logger -p daemon.info -t "$tag" "openbsd patches start"
+url="rsync://$host/OpenBSD/patches/"
+dir="/data/mirror/openbsd/ftp/patches"
+eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+logger -p daemon.notice -t "$tag" "openbsd patches success"
+exit 0
