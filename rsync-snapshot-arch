@@ -23,6 +23,7 @@ tag="rsync-snapshot-arch[$$]"
 logger -p daemon.info -t "$tag" "openbsd $arch start"
 url="rsync://$host/OpenBSD/snapshots/$arch/"
 dir="/data/mirror/openbsd/ftp/snapshots/$arch"
+rm -rf -- "$dir.old"
 if ! [ -d "$dir.new" ]
 then
 	mkdir -p -- "$dir.new"
@@ -58,7 +59,6 @@ else
 		mv -- "$dir" "$dir.old"
 	fi
 	mv -- "$dir.new" "$dir"
-	rm -rf -- "$dir.old"
 	logger -p daemon.notice -t "$tag" "openbsd $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
