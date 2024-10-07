@@ -21,7 +21,7 @@ tag="rsync-package-release-arch[$$]"
 version="$(echo "$version" | tr -cd 0-9)"
 release="${version%[0-9]}.${version#[0-9]}"
 
-logger -p daemon.info -t "$tag" "openbsd package $version $arch start"
+logger -p daemon.info -t "$tag" "openbsd $version $arch start"
 url="rsync://$host/OpenBSD/$release/packages/$arch/"
 dir="/data/mirror/openbsd/ftp/$release/packages/$arch"
 eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
@@ -33,8 +33,7 @@ if ! ( cd "$dir" && signify -C -p "$key" -x SHA256.sig )
 then
         logger -p daemon.warning -t "$tag" "openbsd $dir fail"
 else
-        logger -p daemon.notice -t "$tag" \
-	    "openbsd package $version $arch success"
+        logger -p daemon.notice -t "$tag" "openbsd $version $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
 exit 0

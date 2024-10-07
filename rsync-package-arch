@@ -17,7 +17,7 @@ rsyncoptions="--partial --delete-excluded --exclude .~tmp~ --exclude '.*'"
 rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
 tag="rsync-package-arch[$$]"
 
-logger -p daemon.info -t "$tag" "openbsd package $arch start"
+logger -p daemon.info -t "$tag" "openbsd $arch start"
 url="rsync://$host/OpenBSD/snapshots/packages/$arch/"
 dir="/data/mirror/openbsd/ftp/snapshots/packages/$arch"
 eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
@@ -48,7 +48,7 @@ if ! ( cd "$dir" && signify -C -p "$key" -x SHA256.sig )
 then
 	logger -p daemon.warning -t "$tag" "openbsd $dir fail"
 else
-	logger -p daemon.notice -t "$tag" "openbsd package $arch success"
+	logger -p daemon.notice -t "$tag" "openbsd $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
 exit 0
