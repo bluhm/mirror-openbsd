@@ -1,0 +1,40 @@
+#!/bin/sh
+# call rsync to mirror packages of one release arch from ftp.hostserver.de
+
+set -eu
+
+if [ $# != 2 ]
+then
+	echo usage: rsync-package-release-arch version arch >&2
+	exit 2
+fi
+version="$1"
+arch="$2"
+
+host="${host:=217.31.80.35}"
+bwlimit="${bwlimit:=3000}"
+debug="${debug:=debug}"
+rsyncoptions="--partial --delete-excluded --exclude .~tmp~ --exclude '.*'"
+rsync="/usr/local/bin/rsync --bwlimit=$bwlimit $rsyncoptions"
+tag="rsync-package-release-arch[$$]"
+
+version="$(echo "$version" | tr -cd 0-9)"
+release="${version%[0-9]}.${version#[0-9]}"
+
+logger -p daemon.info -t "$tag" "openbsd package $version $arch start"
+url="rsync://$host/OpenBSD/$release/packages/$arch/"
+dir="/data/mirror/openbsd/ftp/$release/packages/$arch"
+eval $rsync -av "$url" "$dir" | logger -p "daemon.$debug" -t rsync
+
+# verify the signature of the new downloaded files
+
+key="/etc/signify/openbsd-$version-pkg.pub"
+if ! ( cd "$dir" && signify -C -p "$key" -x SHA256.sig )
+then
+        logger -p daemon.warning -t "$tag" "openbsd $dir fail"
+else
+        logger -p daemon.notice -t "$tag" \
+	    "openbsd package $version $arch success"
+fi | logger -p "daemon.$debug" -t signify
+
+exit 0
