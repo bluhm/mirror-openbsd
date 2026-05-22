@@ -41,14 +41,15 @@ do
 		case "$arch" in
 			Changelogs|packages|tools) continue ;;
 		esac
-		logger -p daemon.info -t "$tag" "openbsd $arch start"
+		logger -p daemon.info -t "$tag" \
+		    "openbsd $version $arch start"
 		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
 		else
 			logger -p daemon.notice -t "$tag" \
-			    "openbsd $arch success"
+			    "openbsd $version $arch success"
 		fi | logger -p "daemon.$debug" -t signify
 	done
 
@@ -59,14 +60,15 @@ do
 	do
 		[ -d "$dir" ] || continue
 		package="${dir##*/}"
-		logger -p daemon.info -t "$tag" "openbsd $package start"
+		logger -p daemon.info -t "$tag" \
+		    "openbsd $version $package start"
 		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $dir fail"
 		else
 			logger -p daemon.notice -t "$tag" \
-			    "openbsd $package success"
+			    "openbsd $version $package success"
 		fi | logger -p "daemon.$debug" -t signify
 	done
 
@@ -79,14 +81,15 @@ do
 	do
 		[ -f "$file" ] || continue
 		patch="${file##*/}"
-		logger -p daemon.info -t "$tag" "openbsd $patch start"
+		logger -p daemon.info -t "$tag" \
+		    "openbsd $version $patch start"
 		if ! ( cd "$dir" && signify -V -e -p $key -x $patch -m /dev/null )
 		then
 			logger -p daemon.warning -s -t "$tag" \
 			    "openbsd $file fail"
 		else
 			logger -p daemon.notice -t "$tag" \
-			    "openbsd $patch success"
+			    "openbsd $version $patch success"
 		fi | logger -p "daemon.$debug" -t signify
 	done
 
