@@ -39,7 +39,7 @@ do
 		[ -d "$dir" ] || continue
 		arch="${dir##*/}"
 		case "$arch" in
-			Changelogs|packages|tools) continue ;;
+			Changelogs|packages|packages-stable|tools) continue ;;
 		esac
 		logger -p daemon.info -t "$tag" \
 		    "openbsd $version $arch start"
@@ -56,20 +56,23 @@ do
 	# verify each architecture package
 
 	key="/etc/signify/openbsd-$version-pkg.pub"
-	for dir in $ftp/$release/packages/*
+	for pack in packages packages-stable
 	do
-		[ -d "$dir" ] || continue
-		package="${dir##*/}"
-		logger -p daemon.info -t "$tag" \
-		    "openbsd $version $package start"
-		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
-		then
-			logger -p daemon.warning -s -t "$tag" \
-			    "openbsd $dir fail"
-		else
-			logger -p daemon.notice -t "$tag" \
-			    "openbsd $version $package success"
-		fi | logger -p "daemon.$debug" -t signify
+		for dir in $ftp/$release/$pack/*
+		do
+			[ -d "$dir" ] || continue
+			arch="${dir##*/}"
+			logger -p daemon.info -t "$tag" \
+			    "openbsd $version $pack $arch start"
+			if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
+			then
+				logger -p daemon.warning -s -t "$tag" \
+				    "openbsd $dir fail"
+			else
+				logger -p daemon.notice -t "$tag" \
+				    "openbsd $version $pack $arch success"
+			fi | logger -p "daemon.$debug" -t signify
+		done
 	done
 
 	# verify each patch
