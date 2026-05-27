@@ -24,7 +24,7 @@ release="${version%[0-9]}.${version#[0-9]}"
 # create a new directory with the old files hardlinked
 # if the new directory is already there, use this partial download
 
-logger -p daemon.info -t "$tag" "openbsd $arch start"
+logger -p daemon.info -t "$tag" "openbsd $version $arch start"
 url="rsync://$host/OpenBSD/$release/$arch/"
 dir="/data/mirror/openbsd/ftp/$release/$arch"
 if ! [ -d "$dir.new" ]
@@ -46,7 +46,7 @@ then
 	exit 1
 fi
 key="/etc/signify/openbsd-$version-base.pub"
-logger -p daemon.info -t "$tag" "openbsd $arch signify key $key"
+logger -p daemon.info -t "$tag" "openbsd $version $arch signify key $key"
 
 # verify the signature of the new downloaded files
 
@@ -61,7 +61,7 @@ else
 	fi
 	mv -- "$dir.new" "$dir"
 	rm -rf -- "$dir.old"
-	logger -p daemon.notice -t "$tag" "openbsd $arch success"
+	logger -p daemon.notice -t "$tag" "openbsd $version $arch success"
 fi | logger -p "daemon.$debug" -t signify
 
 exit 0
