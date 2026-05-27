@@ -96,6 +96,25 @@ do
 		fi | logger -p "daemon.$debug" -t signify
 	done
 
+	# verify all syspatches
+
+	key="/etc/signify/openbsd-$version-syspatch.pub"
+	for dir in $ftp/syspatch/$release/*
+	do
+		[ -d "$dir" ] || continue
+		arch="${dir##*/}"
+		logger -p daemon.info -t "$tag" \
+		    "openbsd $version syspatch $arch start"
+		if ! ( cd "$dir" && signify -C -p $key -x SHA256.sig )
+		then
+			logger -p daemon.warning -s -t "$tag" \
+			    "openbsd $dir fail"
+		else
+			logger -p daemon.notice -t "$tag" \
+			    "openbsd $version syspatch $arch success"
+		fi | logger -p "daemon.$debug" -t signify
+	done
+
 	logger -p daemon.notice -t "$tag" "openbsd $version success"
 done
 
